@@ -1,10 +1,18 @@
 let data;
 let people = [];
 let gridLayout = [];
-const english = "IBM Plex Mono";
-const arabic = "Lifta";
 let hoveredSquare = null;
 let scaleFactor = 0.7;
+
+// Fonts are declared as @font-face in style.css and referenced here by family
+// name — deliberately NOT loaded via p5's loadFont(). loadFont() backs a font
+// with opentype.js, and p5's text() then renders each glyph as a path one
+// character at a time, with no BIDI reordering and no contextual letter
+// joining. That mirrors and breaks Arabic. Passing a string family name
+// instead routes text() through the canvas's native fillText, where the
+// browser's text engine applies shaping and RTL layout correctly.
+const english = "IBM Plex Mono";
+const arabic = "Lifta";
 
 function preload() {
   data = loadJSON(
@@ -14,11 +22,14 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  // <html dir="rtl"> propagates into the canvas as an RTL paragraph
+  // direction, which makes the BIDI algorithm push line-end punctuation
+  // in the English help text to the visual-left. Pin the canvas to LTR;
+  // Arabic strings still lay out RTL via BIDI on their own.
+  drawingContext.direction = "ltr";
   noStroke();
   rectMode(CENTER);
   textFont(english);
-  document.fonts.load(`bold 16px "${english}"`);
-  document.fonts.load(`16px "${arabic}"`);
   if (data) {
     let entries = Object.values(data);
     people = entries.filter(
@@ -27,6 +38,13 @@ function setup() {
     createGridLayout();
     console.log("TOTAL KILLED:", people.length);
   }
+  // font-display: block hides glyphs until the face loads, so wait for both
+  // fonts before the first frame to avoid a blank flash on the help text.
+  noLoop();
+  Promise.all([
+    document.fonts.load(`1em "${arabic}"`),
+    document.fonts.load(`bold 1em "${english}"`),
+  ]).then(() => loop());
 }
 
 function createGridLayout() {
@@ -47,7 +65,6 @@ function createGridLayout() {
           y: y + gapY / 2 + offsetY,
           gapX: gapX,
           person: people[personIndex],
-          hover: false,
         });
         personIndex++;
       }
@@ -63,7 +80,6 @@ function windowResized() {
 function draw() {
   background("#E4312b");
 
-  let isMouseOutsideGrid = true;
   let gridLeft = (width - width * scaleFactor) / 2;
   let gridRight = width - gridLeft;
   let gridTop = (height - height * scaleFactor) / 2;
@@ -75,7 +91,6 @@ function draw() {
     let isHovering = dist(mouseX, mouseY, square.x, square.y) < s / 2;
     if (isHovering) {
       hoveredSquare = square;
-      isMouseOutsideGrid = false;
     } else if (hoveredSquare === square) {
       hoveredSquare = null;
     }
@@ -84,7 +99,7 @@ function draw() {
     } else {
       fill("#d9897d");
     }
-    circle(square.x, square.y, s,);
+    circle(square.x, square.y, s);
   });
 
   if (hoveredSquare) {

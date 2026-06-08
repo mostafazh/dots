@@ -1,3 +1,8 @@
+/* Register fonts at the document level so the canvas's native text engine
+   can resolve them by family name. sketch.js relies on this — p5's
+   loadFont() would route Arabic through opentype.js path rendering and
+   skip BIDI/shaping. font-display: block keeps fallback glyphs from
+   flashing while the face loads. */
 @font-face {
   font-family: "Lifta";
   src: url("Lifta.otf") format("opentype");
