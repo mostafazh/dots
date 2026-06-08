@@ -65,6 +65,7 @@ function createGridLayout() {
           y: y + gapY / 2 + offsetY,
           gapX: gapX,
           person: people[personIndex],
+          hover: false,
         });
         personIndex++;
       }
@@ -80,6 +81,7 @@ function windowResized() {
 function draw() {
   background("#E4312b");
 
+  let isMouseOutsideGrid = true;
   let gridLeft = (width - width * scaleFactor) / 2;
   let gridRight = width - gridLeft;
   let gridTop = (height - height * scaleFactor) / 2;
@@ -91,6 +93,7 @@ function draw() {
     let isHovering = dist(mouseX, mouseY, square.x, square.y) < s / 2;
     if (isHovering) {
       hoveredSquare = square;
+      isMouseOutsideGrid = false;
     } else if (hoveredSquare === square) {
       hoveredSquare = null;
     }
@@ -99,7 +102,7 @@ function draw() {
     } else {
       fill("#d9897d");
     }
-    circle(square.x, square.y, s);
+    circle(square.x, square.y, s,);
   });
 
   if (hoveredSquare) {
