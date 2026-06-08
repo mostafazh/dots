@@ -1,8 +1,8 @@
 let data;
 let people = [];
 let gridLayout = [];
-let english;
-let arabic;
+const english = "IBM Plex Mono";
+const arabic = "Lifta";
 let hoveredSquare = null;
 let scaleFactor = 0.7;
 
@@ -10,8 +10,6 @@ function preload() {
   data = loadJSON(
     "https://data.techforpalestine.org/api/v2/killed-in-gaza.json"
   );
-  english = loadFont("IBMPlexMono-Bold.ttf");
-  arabic = loadFont("Lifta.otf");
 }
 
 function setup() {
@@ -19,6 +17,8 @@ function setup() {
   noStroke();
   rectMode(CENTER);
   textFont(english);
+  document.fonts.load(`bold 16px "${english}"`);
+  document.fonts.load(`16px "${arabic}"`);
   if (data) {
     let entries = Object.values(data);
     people = entries.filter(
