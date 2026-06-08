@@ -112,7 +112,7 @@ function draw() {
     let ageTextSize = width * 0.025;
     textSize(arabicTextSize);
     textFont(arabic);
-    text(hoveredSquare.person.name, width / 2, height / 2);
+    text(hoveredSquare.person.name ?? "", width / 2, height / 2);
     textFont(english);
     textSize(ageTextSize);
     text(
