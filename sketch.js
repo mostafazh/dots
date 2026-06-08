@@ -38,13 +38,11 @@ function setup() {
     createGridLayout();
     console.log("TOTAL KILLED:", people.length);
   }
-  // font-display: block hides glyphs until the face loads, so wait for both
-  // fonts before the first frame to avoid a blank flash on the help text.
+  // font-display: block hides glyphs until each face loads; wait for the
+  // document's fonts to settle before the first frame so neither the help
+  // text nor a first hover ever renders blank.
   noLoop();
-  Promise.all([
-    document.fonts.load(`1em "${arabic}"`),
-    document.fonts.load(`bold 1em "${english}"`),
-  ]).then(() => loop());
+  document.fonts.ready.then(() => loop());
 }
 
 function createGridLayout() {
