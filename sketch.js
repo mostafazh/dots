@@ -14,6 +14,19 @@ function preload() {
   arabic = loadFont("Lifta.otf");
 }
 
+function normalizeArabicText(value) {
+  if (value == null) {
+    return "";
+  }
+
+  return String(value).trim();
+}
+
+function prepareArabicForCanvas(value) {
+  const normalized = normalizeArabicText(value);
+  return normalized.split("").reverse().join("");
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   noStroke();
@@ -94,7 +107,7 @@ function draw() {
     let ageTextSize = width * 0.025;
     textSize(arabicTextSize);
     textFont(arabic);
-    text(`${hoveredSquare.person.name}`, width / 2, height / 2);
+    text(prepareArabicForCanvas(hoveredSquare.person.name), width / 2, height / 2);
     textFont(english);
     textSize(ageTextSize);
     text(
