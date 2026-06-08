@@ -1,21 +1,32 @@
 let data;
 let people = [];
 let gridLayout = [];
-let english;
-let arabic;
 let hoveredSquare = null;
 let scaleFactor = 0.7;
+
+// Fonts are declared as @font-face in style.css and referenced here by family
+// name — deliberately NOT loaded via p5's loadFont(). loadFont() backs a font
+// with opentype.js, and p5's text() then renders each glyph as a path one
+// character at a time, with no BIDI reordering and no contextual letter
+// joining. That mirrors and breaks Arabic. Passing a string family name
+// instead routes text() through the canvas's native fillText, where the
+// browser's text engine applies shaping and RTL layout correctly.
+const english = "IBM Plex Mono";
+const arabic = "Lifta";
 
 function preload() {
   data = loadJSON(
     "https://data.techforpalestine.org/api/v2/killed-in-gaza.json"
   );
-  english = loadFont("IBMPlexMono-Bold.ttf");
-  arabic = loadFont("Lifta.otf");
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  // <html dir="rtl"> propagates into the canvas as an RTL paragraph
+  // direction, which makes the BIDI algorithm push line-end punctuation
+  // in the English help text to the visual-left. Pin the canvas to LTR;
+  // Arabic strings still lay out RTL via BIDI on their own.
+  drawingContext.direction = "ltr";
   noStroke();
   rectMode(CENTER);
   textFont(english);
@@ -27,6 +38,11 @@ function setup() {
     createGridLayout();
     console.log("TOTAL KILLED:", people.length);
   }
+  // font-display: block hides glyphs until each face loads; wait for the
+  // document's fonts to settle before the first frame so neither the help
+  // text nor a first hover ever renders blank.
+  noLoop();
+  document.fonts.ready.then(() => loop());
 }
 
 function createGridLayout() {
@@ -94,7 +110,7 @@ function draw() {
     let ageTextSize = width * 0.025;
     textSize(arabicTextSize);
     textFont(arabic);
-    text(`${hoveredSquare.person.name}`, width / 2, height / 2);
+    text(hoveredSquare.person.name ?? "", width / 2, height / 2);
     textFont(english);
     textSize(ageTextSize);
     text(
